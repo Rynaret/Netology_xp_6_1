@@ -1,6 +1,7 @@
 import { Movie } from './movie.js'
 
 export class Shop{
+    static get minMoviesCountForDiscount(){return 2;}
 
     constructor(shop) {
         this._name = shop.name;
@@ -8,8 +9,6 @@ export class Shop{
     }
 
     get movies() {return this._movies.map(x => new Movie(x));}
-
-    get minCountMoviesForDiscount() {return 2;}
 
     get name() {return this._name;}
     set name(value) {this._name = value;}
@@ -27,7 +26,7 @@ export class Shop{
     getMovies(moviesNames){
         let movies = moviesNames.map(x => this.getMovie(x));
 
-        if(movies.length >= this.minCountMoviesForDiscount){
+        if(movies.length >= Shop.minMoviesCountForDiscount){
             movies.forEach(movie => movie.discount = 5);
         }
 

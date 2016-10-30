@@ -1,4 +1,5 @@
 export class Seller{
+    static get maxMoviesCountInOrder(){return 5;}
 
     constructor(shop = null) {
         this._shop = shop;
@@ -12,6 +13,10 @@ export class Seller{
     }
 
     getMovies(moviesNames){
+        if(moviesNames.length > Seller.maxMoviesCountInOrder){
+            throw new Error(`Shop give only ${Seller.maxMoviesCountInOrder} movies in one order`);
+        }
+
         return this.shop.getMovies(moviesNames);
     }
 }

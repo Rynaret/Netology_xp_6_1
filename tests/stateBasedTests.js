@@ -1,4 +1,5 @@
 import assert from 'assert'
+import { expect } from 'chai'
 import {Shop} from '../src/shop.js'
 import {Client} from '../src/client.js'
 import {Seller} from '../src/seller.js'
@@ -37,12 +38,12 @@ suite("When client in Video Rental shop", function () {
     // Клиент может взять несколько фильмов и получить скидку 5% за каждый
     suite("client ask 'Terminator', 'Die Hard', 'Star Wars' movies", function () {
         suite("shop have movies", function () {
-            const askMovies = ['Terminator', 'Die Hard', 'Star Wars'];
-            let shop = new Shop({movies: askMovies});
+            const askThreeMovies = ['Terminator', 'Die Hard', 'Star Wars'];
+            let shop = new Shop({movies: askThreeMovies});
             let seller = new Seller(shop);
 
             test('then client get 5% discount', function () {
-                const askMoviesNames = askMovies;
+                const askMoviesNames = askThreeMovies;
 
                 const movies = seller.getMovies(askMoviesNames);
 
@@ -54,4 +55,21 @@ suite("When client in Video Rental shop", function () {
         });
     });
 
+    // Не выдавать больше 5 фильмов за раз одному клиенту
+    suite("client ask 6 movies", function () {
+        suite("shop have movies", function () {
+            const askSixMovies = ['Terminator', 'Die Hard', 'Star Wars', 'Terminator 2', 'Terminator 3', 'Die Hard 2'];
+            let shop = new Shop({movies: askSixMovies});
+            let seller = new Seller(shop);
+
+            test('then seller say: "Shop give only 5 movies in one order"', function () {
+                const askMoviesNames = askSixMovies;
+
+                const result = ()=>{seller.getMovies(askMoviesNames)};
+
+                const expectedError = new Error(`Shop give only ${Seller.maxMoviesCountInOrder} movies in one order`);
+                expect(result).to.throw(expectedError.message);
+            });
+        });
+    });
 });
