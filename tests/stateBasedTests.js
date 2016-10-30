@@ -16,21 +16,21 @@ import {Movie} from '../src/movie.js'
 suite("When client in Video Rental shop", function () {
     let client = new Client();
     setup(function () {
-
+        client.clear();
     });
 
     // Клиент может взять фильм в прокат
     suite("client ask 'Terminator' movie rental", function () {
         suite("shop have movies", function () {
             let shop = new Shop({movies: ['Terminator']});
-            let seller = new Seller(shop);
+            let seller = new Seller(shop, client);
 
             test("then seller give 'Terminator' movie", function () {
-                const askMovieName = 'Terminator';
+                const askMovieName = ['Terminator'];
 
-                const movie = seller.getMovie(askMovieName);
+                const movie = seller.getMovies(askMovieName);
 
-                assert.equal(askMovieName, movie.name);
+                assert.equal(askMovieName[0], movie[0].name);
             });
         });
     });
@@ -40,7 +40,7 @@ suite("When client in Video Rental shop", function () {
         suite("shop have movies", function () {
             const askThreeMovies = ['Terminator', 'Die Hard', 'Star Wars'];
             let shop = new Shop({movies: askThreeMovies});
-            let seller = new Seller(shop);
+            let seller = new Seller(shop, client);
 
             test('then client get 5% discount', function () {
                 const askMoviesNames = askThreeMovies;
@@ -60,7 +60,7 @@ suite("When client in Video Rental shop", function () {
         suite("shop have movies", function () {
             const askSixMovies = ['Terminator', 'Die Hard', 'Star Wars', 'Terminator 2', 'Terminator 3', 'Die Hard 2'];
             let shop = new Shop({movies: askSixMovies});
-            let seller = new Seller(shop);
+            let seller = new Seller(shop, client);
 
             test('then seller say: "Shop give only 5 movies in one order"', function () {
                 const askMoviesNames = askSixMovies;
@@ -69,6 +69,26 @@ suite("When client in Video Rental shop", function () {
 
                 const expectedError = new Error(`Shop give only ${Seller.maxMoviesCountInOrder} movies in one order`);
                 expect(result).to.throw(expectedError.message);
+            });
+        });
+    });
+
+    // Если клиент не вернул прошлый фильм, не выдавать ему новых
+    suite("client ask 'Terminator' movie", function () {
+        suite("client didn't return a last one", function () {
+            let shop = new Shop({movies: ['Terminator']});
+
+            let clientStub = new Client();
+            clientStub.moviesOnHand = ['Die Hard'];
+
+            let seller = new Seller(shop, clientStub);
+
+            test('then seller say: "You must return the last one"', function () {
+                const askMovieName = ['Terminator'];
+
+                const result = () => {seller.getMovies(askMovieName)};
+
+                expect(result).to.throw(/You must return the last one/);
             });
         });
     });
