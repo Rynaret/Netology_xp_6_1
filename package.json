@@ -3,6 +3,7 @@
     "test": "mocha --compilers js:babel-core/register --ui tdd tests/*Tests.js"
   },
   "devDependencies": {
+    "sinon": "latest",
     "mocha": "~2.4.5",
     "chai": "~3.5.0",
     "chai-http": "~2.0.1",
