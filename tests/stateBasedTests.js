@@ -93,3 +93,16 @@ suite("When client in Video Rental shop", function () {
         });
     });
 });
+
+// Приведи друга, получи дополнительную скидку 10%
+suite('When client invite friend', function(){
+    let client = new Client();
+
+    test('then client get 10% discount', function(){
+        const mustGetDiscount = 10;
+
+        client.inviteFriend();
+
+        assert.equal(mustGetDiscount, client.discount);
+    });
+});
