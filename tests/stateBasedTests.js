@@ -59,8 +59,8 @@ suite("When client in Video Rental shop", function () {
     suite("client ask 6 movies", function () {
         suite("shop have movies", function () {
             const askSixMovies = ['Terminator', 'Die Hard', 'Star Wars', 'Terminator 2', 'Terminator 3', 'Die Hard 2'];
-            let shop = new Shop({movies: askSixMovies});
-            let seller = new Seller(shop, client);
+            let shopStub = {movies: askSixMovies};
+            let seller = new Seller(shopStub, client);
 
             test('then seller say: "Shop give only 5 movies in one order"', function () {
                 const askMoviesNames = askSixMovies;
@@ -78,8 +78,9 @@ suite("When client in Video Rental shop", function () {
         suite("client didn't return a last one", function () {
             let shop = new Shop({movies: ['Terminator']});
 
-            let clientStub = new Client();
-            clientStub.moviesOnHand = ['Die Hard'];
+            let clientStub = {
+                moviesOnHand: ['Die Hard']
+            };
 
             let seller = new Seller(shop, clientStub);
 

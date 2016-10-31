@@ -7,10 +7,8 @@ export class Seller{
     }
 
     get client(){return this._client;}
-    set client(value){this._client = value;}
 
     get shop(){return this._shop;}
-    set shop(value){this._shop = value;}
 
     getMovies(moviesNames){
         this.checkClientDebt();
