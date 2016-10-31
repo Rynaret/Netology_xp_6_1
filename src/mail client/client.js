@@ -1,3 +1,5 @@
+import { Message } from './message'
+
 export class Client{
 
     constructor(mailService, environment) {
@@ -9,11 +11,29 @@ export class Client{
     get environment(){return this._environment;}
 
     availableConnectionToInternet(){
-        return this.environment.checkInternet();
+        if(!this.environment.checkInternet()){
+            return false;
+        }
+
+        this.sendAutomaticallyMessagesInQueue();
+
+        return true;
     }
 
-    addToQueue(from, to, msg){
+    sendAutomaticallyMessagesInQueue(){
+        this.messagesInQueue.forEach((item)=>{
+            this.mailService.sendMessage(item.sender, item.recipient, item.message);
+        });
+    }
 
+    get messagesInQueue(){return this._messagesInQueue;}
+    set messagesInQueue(value){this._messagesInQueue = value;}
+
+    addMessageToQueue(msg){this._messagesInQueue.push(msg);}
+
+    addToQueue(from, to, msg){
+        let message = new Message({message: msg,recipient:to,sender:from});
+        this.addMessageToQueue(message);
     }
 
     sendMessage(to, msg){

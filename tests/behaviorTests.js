@@ -20,8 +20,6 @@ suite('Mail service should', ()=>{
     let mailService = new MailService();
     let mailServiceMock;
 
-
-
     test('provide account creating', ()=>{
         mailServiceMock = sinon.mock(mailService);
         let newAccount = new Account({name:""});
@@ -95,33 +93,62 @@ suite('Mail service should', ()=>{
 });
 
 // Если у меня отключен интернет, письмо ставится в очередь на отправку
-suite('When I have not got connection to the Internet', ()=>{
-    test('then my message go to queue', ()=>{
-        let mailServiceStub = {
-            sendMessage:(from, to, msg)=>{
+suite('When I send message', ()=>{
+    suite('have not got connection to the Internet', ()=> {
+        test('then my message go to queue', ()=> {
+            let mailServiceStub = {
+                sendMessage: (from, to, msg)=> {
 
+                }
+            };
+            let environmentStub = {
+                checkInternet: ()=> {
+                    return false;
+                }
+            };
+
+            let msg = "New message";
+            let to = new Client(mailServiceStub, environmentStub);
+
+            let client = new Client(mailServiceStub, environmentStub);
+            let clientMock = sinon.mock(client);
+
+            clientMock.expects('addToQueue').withArgs(client, to, msg).once();
+
+            try {
+                client.sendMessage(to, msg);
+            } catch (err) {
             }
-        };
-        let environmentStub = {
-            checkInternet:()=>{
-                return false;
+
+            clientMock.restore();
+            clientMock.verify();
+        });
+    });
+
+    // Когда появляется интернет, письмо само отправляется из очереди
+    suite('have got connection to the Internet and message in queue', ()=> {
+        test('then message sent automatically', ()=>{
+            let environmentStub = {
+                checkInternet: ()=> {
+                    return true;
+                }
+            };
+            let msgInQueue = {message: '',recipient:'',sender:''};
+            let mailService = new MailService();
+            let mailServiceMock = sinon.mock(mailService);
+            let client = new Client(mailService, environmentStub);
+            client.messagesInQueue = [msgInQueue];
+
+            mailServiceMock.expects('sendMessage').withArgs(msgInQueue.sender, msgInQueue.recipient, msgInQueue.message).once();
+
+            try {
+                client.availableConnectionToInternet();
+            } catch (err) {
             }
-        };
 
-        let msg = "New message";
-        let to = new Client(mailServiceStub, environmentStub);
-
-        let client = new Client(mailServiceStub, environmentStub);
-        let clientMock = sinon.mock(client);
-
-        clientMock.expects('addToQueue').withArgs(client, to, msg).once();
-
-        try{
-            client.sendMessage(to, msg);
-        }catch (err){}
-
-        clientMock.restore();
-        clientMock.verify();
+            mailServiceMock.restore();
+            mailServiceMock.verify();
+        });
     });
 });
 
