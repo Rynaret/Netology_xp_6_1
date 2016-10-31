@@ -55,11 +55,13 @@ suite('Mail service should', ()=>{
 
     // Я могу отправлять письма
     suite('provide mail sending', ()=>{
+        let mailServiceStub = {};
+        let environmentStub = {};
         mailServiceMock = sinon.mock(mailService);
 
         let msg = "New message";
-        let from = new Client();
-        let to = new Client();
+        let from = new Client(mailServiceStub,environmentStub);
+        let to = new Client(mailServiceStub,environmentStub);
 
         mailServiceMock.expects('sendMessage').withArgs(from, to, msg).once();
         try{
@@ -72,12 +74,14 @@ suite('Mail service should', ()=>{
 
     // Я могу получать письма
     suite('provide receiving mail', ()=>{
+        let mailServiceStub = {};
+        let environmentStub = {};
         let account = new Account({name:''});
         let accountMock = sinon.mock(account);
 
         let msg = "New message";
-        let from = new Client();
-        let to = new Client();
+        let from = new Client(mailServiceStub,environmentStub);
+        let to = new Client(mailServiceStub,environmentStub);
 
         accountMock.expects('addMessage').withArgs(to, msg).once();
         try{
@@ -87,4 +91,52 @@ suite('Mail service should', ()=>{
         mailServiceMock.restore();
         mailServiceMock.verify();
     });
+
 });
+
+// Если у меня отключен интернет, письмо ставится в очередь на отправку
+suite('When I have not got connection to the Internet', ()=>{
+    test('then my message go to queue', ()=>{
+        let mailServiceStub = {
+            sendMessage:(from, to, msg)=>{
+
+            }
+        };
+        let environmentStub = {
+            checkInternet:()=>{
+                return false;
+            }
+        };
+
+        let msg = "New message";
+        let to = new Client(mailServiceStub, environmentStub);
+
+        let client = new Client(mailServiceStub, environmentStub);
+        let clientMock = sinon.mock(client);
+
+        clientMock.expects('addToQueue').withArgs(client, to, msg).once();
+
+        try{
+            client.sendMessage(to, msg);
+        }catch (err){}
+
+        clientMock.restore();
+        clientMock.verify();
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
